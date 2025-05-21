@@ -1,4 +1,4 @@
-name: Java Tests without Build Tool
+name: Java Manual Test Pipeline
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  run-tests:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,14 +20,15 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Download JUnit 5
+    - name: Download JUnit 5 standalone
       run: |
-        mkdir libs
-        curl -L -o libs/junit-platform-console-standalone.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.2/junit-platform-console-standalone-1.10.2.jar
+        mkdir -p libs
+        curl -L -o libs/junit-platform-console-standalone.jar \
+          https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.2/junit-platform-console-standalone-1.10.2.jar
 
     - name: Compile all Java files
       run: |
-        mkdir out
+        mkdir -p out
         javac -cp libs/junit-platform-console-standalone.jar -d out *.java
 
     - name: Run selected tests
