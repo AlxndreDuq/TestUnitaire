@@ -1,4 +1,4 @@
-name: Java Selective Tests
+name: Java Tests without Build Tool
 
 on:
   push:
@@ -7,19 +7,33 @@ on:
     branches: [ main ]
 
 jobs:
-  run-selected-tests:
+  run-tests:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Run selected tests with Maven
+    - name: Download JUnit 5
       run: |
-        mvn -Dtest=BankAccountTest,CalculatriceTest,ShoppingCartTest test
+        mkdir libs
+        curl -L -o libs/junit-platform-console-standalone.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.2/junit-platform-console-standalone-1.10.2.jar
+
+    - name: Compile all Java files
+      run: |
+        mkdir out
+        javac -cp libs/junit-platform-console-standalone.jar -d out *.java
+
+    - name: Run selected tests
+      run: |
+        java -jar libs/junit-platform-console-standalone.jar \
+          --classpath out \
+          --select-class BankAccountTest \
+          --select-class CalculatriceTest \
+          --select-class ShoppingCartTest
